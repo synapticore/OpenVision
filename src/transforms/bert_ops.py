@@ -17,30 +17,25 @@
 import functools
 import logging
 
-from src.helpers.registry import Registry, InKeyOutKey
-from src.helpers import utils as bv_utils
+import numpy as np
+import nltk
 import tensorflow as tf
 import tensorflow_text
 
-import  numpy as np
-
-import functools
-import logging
-
-
-import tensorflow as tf
-import tensorflow_text
-import sys
-import  numpy as np
-
 from src.helpers.registry import Registry, InKeyOutKey
 from src.helpers import utils as bv_utils
+
+# Download NLTK data once at module import
+nltk.download('punkt', quiet=True)
+nltk.download('averaged_perceptron_tagger', quiet=True)
 
 # Internally using
 # BasicTokenizer
 # https://github.com/tensorflow/text/blob/df5250d6cf1069990df4bf55154867391ab5381a/tensorflow_text/python/ops/bert_tokenizer.py#L67
 # WordpieceTokenizer
 # https://github.com/tensorflow/text/blob/master/tensorflow_text/python/ops/wordpiece_tokenizer.py
+
+@functools.lru_cache(maxsize=8)
 def _create_bert_tokenizer(vocab_path, add_bos=False, add_eos=False):
   with tf.io.gfile.GFile(vocab_path) as f:
     vocab = f.read().split("\n")
@@ -66,11 +61,8 @@ def get_order(x):
     else:
         return 4
 
-import nltk
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
 
-
+@functools.lru_cache(maxsize=4)
 def _create_noun_tokenizer(vocab_path):
   with tf.io.gfile.GFile(vocab_path) as f:
     vocab = f.read().split("\n")
@@ -134,7 +126,7 @@ def get_pp_bert_tokenize(vocab_path, max_len, sample_if_multi=True):
 
 
 @Registry.register("preprocess_ops.concat_bert_tokenize")
-def get_pp_bert_tokenize(vocab_path, max_len, sample_if_multi=True, prob=0.5, concat=False, key1='txt', key2='llava_caption'):
+def get_pp_bert_tokenize_concat(vocab_path, max_len, sample_if_multi=True, prob=0.5, concat=False, key1='txt', key2='llava_caption'):
   """Extracts tokens with tensorflow_text.BertTokenizer.
 
   Args:
@@ -264,7 +256,7 @@ def get_pass_keys():
 
 @Registry.register("preprocess_ops.noun_tokenize")
 @InKeyOutKey(indefault=None, outdefault="labels")
-def get_pass_keys(vocab_path, max_len, sample_if_multi=True):
+def get_noun_tokenize(vocab_path, max_len, sample_if_multi=True):
 
   cls_token, pos_tensor ,tokenizer = _create_noun_tokenizer(vocab_path)
 

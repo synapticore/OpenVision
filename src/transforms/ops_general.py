@@ -174,7 +174,7 @@ def get_copy(inkey, outkey):
 
 
 @Registry.register("preprocess_ops.random_copy")
-def get_copy(inkey1, inkey2, outkey, prob=0.5):
+def get_random_copy(inkey1, inkey2, outkey, prob=0.5):
   """Randomly copy the value of `inkey1` or 'inkey2' with probability 'prob' into `outkey`."""
 
   def _copy(data):

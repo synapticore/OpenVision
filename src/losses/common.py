@@ -37,6 +37,24 @@ def unbatched_gather(x, ids_keep):
 
 batched_gather = jax.vmap(unbatched_gather)
 
+
+def extract_diagonal_logits(logits, rank):
+    """Efficiently extract diagonal elements from logits using vectorized operations.
+    
+    Replaces inefficient list comprehension pattern:
+        -jnp.array([logits[i][i + rank * logits.shape[0]] for i in range(logits.shape[0])])
+    
+    Args:
+        logits: 2D array of shape [batch_size, num_classes]
+        rank: Current process rank for distributed training
+        
+    Returns:
+        1D array of negative diagonal logits
+    """
+    batch_size = logits.shape[0]
+    indices = jnp.arange(batch_size) + rank * batch_size
+    return -logits[jnp.arange(batch_size), indices]
+
 def sigmoid_xent(*, logits, labels, reduction=True):
   # NOTE: This implementation is stable, see these two:
   # (internal link)
@@ -151,17 +169,13 @@ def bidirectional_contrastive_loss(
             rank = jax.lax.axis_index('batch')
             print(f'local logits has a shape of {logits_img1.shape}')
 
-            # calculate the loss of the first part
-            l1_part1 = -jnp.array([logits_img1[i][i + rank * logits_img1.shape[0]]
-                                    for i in range(logits_img1.shape[0])])
-            l2_part1 = -jnp.array([logits_txt1[i][i + rank * logits_txt1.shape[0]]
-                                    for i in range(logits_txt1.shape[0])])
+            # calculate the loss of the first part using vectorized operations
+            l1_part1 = extract_diagonal_logits(logits_img1, rank)
+            l2_part1 = extract_diagonal_logits(logits_txt1, rank)
 
-            # calculate the loss of the second part
-            l1_part2 = -jnp.array([logits_img2[i][i + rank * logits_img2.shape[0]]
-                                    for i in range(logits_img2.shape[0])])
-            l2_part2 = -jnp.array([logits_txt2[i][i + rank * logits_txt2.shape[0]]
-                                    for i in range(logits_txt2.shape[0])])
+            # calculate the loss of the second part using vectorized operations
+            l1_part2 = extract_diagonal_logits(logits_img2, rank)
+            l2_part2 = extract_diagonal_logits(logits_txt2, rank)
 
             # combine the loss of the two parts
             local_loss1 = 0.5 * (l1_part1 + l2_part1)
@@ -196,10 +210,8 @@ def bidirectional_contrastive_loss(
         logits_txt = jax.nn.log_softmax(
             jnp.dot(local_txt_logits, zimg.T) * t, axis=1)
 
-        l1 = -jnp.array([logits_img[i][i + rank * logits_img.shape[0]]
-                         for i in range(logits_img.shape[0])])
-        l2 = -jnp.array([logits_txt[i][i + rank * logits_txt.shape[0]]
-                         for i in range(logits_txt.shape[0])])
+        l1 = extract_diagonal_logits(logits_img, rank)
+        l2 = extract_diagonal_logits(logits_txt, rank)
 
         l = 0.5 * (l1 + l2)
 
