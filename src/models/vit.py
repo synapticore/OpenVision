@@ -149,20 +149,6 @@ def get_2d_sincos_pos_embed(embed_dim, grid_size, dtype=jnp.float32, cls_token=F
     return jnp.asarray(pos_embed, dtype)[None, :, :]
 
 
-def posemb_sincos_2d(h, w, width, temperature=10_000., dtype=jnp.float32, cls_token=False):
-  """Follows the MoCo v3 logic."""
-  y, x = jnp.mgrid[:h, :w]
-
-  assert width % 4 == 0, "Width must be mult of 4 for sincos posemb"
-  omega = jnp.arange(width // 4) / (width // 4 - 1)
-  omega = 1. / (temperature**omega)
-  y = jnp.einsum("m,d->md", y.flatten(), omega)
-  x = jnp.einsum("m,d->md", x.flatten(), omega)
-  pe = jnp.concatenate([jnp.sin(x), jnp.cos(x), jnp.sin(y), jnp.cos(y)], axis=1)
-  if cls_token:
-      pe = jnp.concatenate([jnp.zeros([1, width]), pe], axis=0)
-  return jnp.asarray(pe, dtype)[None, :, :]
-
 def get_posemb(self, typ, seqshape, width, name, dtype=jnp.float32, cls_token=False):
   if typ == "learn":
     num_token = 1 if cls_token else 0
@@ -172,7 +158,7 @@ def get_posemb(self, typ, seqshape, width, name, dtype=jnp.float32, cls_token=Fa
                       #nn.initializers.normal(stddev=1/np.sqrt(width)),
                       (1, np.prod(seqshape) + num_token, width), dtype)
   elif typ == "sincos2d":
-    return posemb_sincos_2d(*seqshape, width, dtype=dtype, cls_token=cls_token)
+    return utils.posemb_sincos_2d(*seqshape, width, dtype=dtype, cls_token=cls_token)
     #return get_2d_sincos_pos_embed(width, seqshape[0], dtype=dtype, cls_token=cls_token)
   else:
     raise ValueError(f"Unknown posemb type: {typ}")

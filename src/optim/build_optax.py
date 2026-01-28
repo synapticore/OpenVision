@@ -21,63 +21,8 @@ import jax.numpy as jnp
 import optax
 import src.helpers.utils as u
 
-def steps(prefix, config, data_size=None, batch_size=None, total_steps=None,
-          default=ValueError):
-  """Gets duration named `prefix` out of `config` and converts it to steps.
-
-  Using this function to access a configuration value that denotes some kind
-  of duration (eg training time, warmup, checkpoint frequency, ...) allows the
-  duration to be specified in terms of steps, epochs, examples, or percent of
-  training time, and converts any of these into steps, such that the training
-  code only deals with steps.
-  If the result is not an integer step number, it is rounded to the nearest one.
-
-  Args:
-    prefix: The name of the duration to query. The actual config fields can
-      then be one of `prefix_steps`, `prefix_examples`, or `prefix_epochs`.
-    config: The dictionary (config) from which to read the duration.
-    data_size: The total number of training examples in one epoch.
-    batch_size: The number of examples processed per step.
-    total_steps: The total number of training steps to run.
-    default: The default value to return when no duration of the name `prefix`
-      is found in the `config`. Set to `ValueError` (the default) to raise an
-      error instead of returning a default value.
-
-  Returns:
-    The number of steps from the config, or the default value.
-
-  Raises:
-    ValueError if there is no such duration in the config and no default is set.
-  """
-  # Be helpful and make sure only match one of the following suffixes.
-  suffixes = {"steps", "examples", "epochs", "percent"}
-  matches = {f"{prefix}_{s}" for s in suffixes if f"{prefix}_{s}" in config}
-  # Note that steps=0 is also a valid value (e.g. to only run evaluators).
-  assert len(matches) <= 1, f"Only one of '{matches}' should be defined."
-
-  if f"{prefix}_steps" in config:
-    return config[f"{prefix}_steps"]
-
-  if batch_size and f"{prefix}_examples" in config:
-    return max(round(config[f"{prefix}_examples"] / batch_size), 1)
-
-  if batch_size and data_size and f"{prefix}_epochs" in config:
-    steps_per_epoch = data_size / batch_size
-    return max(round(config[f"{prefix}_epochs"] * steps_per_epoch), 1)
-
-  if total_steps and f"{prefix}_percent" in config:
-    pct = config[f"{prefix}_percent"]
-    assert 0.0 <= pct <= 1.0, (  # Be helpful, since it's not obvious.
-        f"Percents should lie in [0.0, 1.0], but {prefix}_percent is {pct}")
-    return max(round(pct * total_steps), 1)
-
-  if default is ValueError:
-    raise ValueError(
-        f"Cannot convert {prefix} to steps, due to missing batch_size "
-        f"({batch_size}), data_size ({data_size}), total_steps ({total_steps})"
-        ", or corresponding entry in config:\n" + "\n".join(config.keys()))
-
-  return default
+# Use the steps function from utils
+steps = u.steps
 
 
 def create_learning_rate_schedule(

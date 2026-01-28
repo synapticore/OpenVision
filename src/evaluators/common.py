@@ -100,3 +100,27 @@ class _CacheablePartial:
 
   def __call__(self, *args, **kwargs):
     return functools.partial(self.fn, **self.kwargs)(*args, **kwargs)
+
+
+def with_infinite_padding(dataset):
+  """Adds "infinite padding" to the dataset.
+  
+  This is a shared utility function used by multiple evaluators to add
+  padding to datasets for batch processing.
+  
+  Args:
+    dataset: A TensorFlow dataset to add padding to.
+    
+  Returns:
+    A dataset with infinite padding appended.
+  """
+  import tensorflow as tf
+  
+  filler_element = tf.nest.map_structure(
+      lambda spec: tf.zeros(spec.shape, spec.dtype)[None], dataset.element_spec)
+  filler_element["mask"] = [False]
+  filler_dataset = tf.data.Dataset.from_tensor_slices(filler_element)
+  dataset = dataset.map(
+      lambda features: dict(mask=True, **features),
+      num_parallel_calls=tf.data.experimental.AUTOTUNE)
+  return dataset.concatenate(filler_dataset.repeat(None))

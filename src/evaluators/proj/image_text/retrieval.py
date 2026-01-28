@@ -51,20 +51,12 @@ from src.evaluators.proj.image_text import image_text_retrieval
 import src.datasets.build_transforms as pp_builder
 from src.datasets import input_pipeline
 from src.helpers.sharding import reshard
+from src.evaluators.common import with_infinite_padding
 
 
 
-def _with_infinite_padding(dataset):
-  """Adds "infinite padding" to the dataset."""
-  filler_element = tf.nest.map_structure(
-      lambda spec: tf.zeros(spec.shape, spec.dtype)[None], dataset.element_spec)
-  filler_element["mask"] = [False]
-  filler_dataset = tf.data.Dataset.from_tensor_slices(filler_element)
-  dataset = dataset.map(
-      lambda features: dict(mask=True, **features),
-      num_parallel_calls=tf.data.experimental.AUTOTUNE)
-  return dataset.concatenate(filler_dataset.repeat(None))
-
+# Use the shared function from common module instead of local definition
+_with_infinite_padding = with_infinite_padding
 
 
 # This is needed so retrieval_test can replace dataset info.
