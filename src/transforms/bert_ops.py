@@ -301,7 +301,7 @@ def get_noun_tokenize(vocab_path, max_len, sample_if_multi=True):
 
 @Registry.register("preprocess_ops.custom_bert_tokenize")
 @InKeyOutKey(indefault=None, outdefault="labels")
-def get_pp_bert_tokenize(vocab_path, max_len, sample_if_multi=True, mask_type='first', train=True):
+def get_pp_bert_tokenize_custom(vocab_path, max_len, sample_if_multi=True, mask_type='first', train=True):
   """Extracts tokens with tensorflow_text.BertTokenizer.
 
   Args:
@@ -435,7 +435,7 @@ def concate_two_captions(data):
 
 
 @Registry.register("preprocess_ops.my_bert_tokenize")
-def get_pp_custom_bert_tokenize(vocab_path, max_len, output_token_len, sample_if_multi=True,
+def get_pp_my_bert_tokenize(vocab_path, max_len, output_token_len, sample_if_multi=True,
                                 add_bos=False, add_eos=False, key1='txt', key2='llava_caption'):
   """Extracts tokens with tensorflow_text.BertTokenizer.
   Add custom args for coca training.
@@ -584,7 +584,7 @@ def get_pp_custom_bert_tokenize(vocab_path, max_len, output_token_len, sample_if
 
 
 @Registry.register("preprocess_ops.my_bert_tokenize_v2")
-def get_pp_custom_bert_tokenize(vocab_path, max_len, sample_if_multi=True,
+def get_pp_my_bert_tokenize_v2(vocab_path, max_len, sample_if_multi=True,
                                 add_bos=False, add_eos=False, key='txt'):
   """Extracts tokens with tensorflow_text.BertTokenizer.
   Add custom args for coca training.
@@ -666,7 +666,7 @@ def get_pp_custom_bert_tokenize(vocab_path, max_len, sample_if_multi=True,
 
 
 @Registry.register("preprocess_ops.new_bert_tokenize")
-def get_pp_custom_bert_tokenize(vocab_path, max_len, output_token_len, sample_if_multi=True,
+def get_pp_new_bert_tokenize(vocab_path, max_len, output_token_len, sample_if_multi=True,
                                 add_bos=False, add_eos=False, key1='txt', key2='llava_caption'):
   """Extracts tokens with tensorflow_text.BertTokenizer.
   Add custom args for coca training.
@@ -784,7 +784,7 @@ def get_pp_custom_bert_tokenize(vocab_path, max_len, output_token_len, sample_if
 
 @Registry.register("preprocess_ops.my_eval_bert_tokenize")
 @InKeyOutKey(indefault=None, outdefault="labels", with_data=True)
-def get_pp_custom_bert_tokenize(vocab_path, max_len, sample_if_multi=True,
+def get_pp_my_eval_bert_tokenize(vocab_path, max_len, sample_if_multi=True,
                                 add_bos=False, add_eos=False):
   """Extracts tokens with tensorflow_text.BertTokenizer.
   Add custom args for coca training.
