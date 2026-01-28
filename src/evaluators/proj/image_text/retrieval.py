@@ -54,8 +54,12 @@ from src.helpers.sharding import reshard
 from src.evaluators.common import with_infinite_padding
 
 
+# Alias to shared utility function for backward compatibility
+_with_infinite_padding = with_infinite_padding
 
-# Use the shared function from common module instead of local definition
+
+
+# Alias to shared utility function for backward compatibility
 _with_infinite_padding = with_infinite_padding
 
 

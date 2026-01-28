@@ -25,9 +25,16 @@ import tensorflow_text
 from src.helpers.registry import Registry, InKeyOutKey
 from src.helpers import utils as bv_utils
 
-# Download NLTK data once at module import
-nltk.download('punkt', quiet=True)
-nltk.download('averaged_perceptron_tagger', quiet=True)
+# Download NLTK data once at module import (if not already present)
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt', quiet=True)
+
+try:
+    nltk.data.find('taggers/averaged_perceptron_tagger')
+except LookupError:
+    nltk.download('averaged_perceptron_tagger', quiet=True)
 
 # Internally using
 # BasicTokenizer

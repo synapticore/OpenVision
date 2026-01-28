@@ -39,17 +39,18 @@ l1 = extract_diagonal_logits(logits_img, rank)
 
 **Issue**: Multiple functions with identical names causing only the last definition to be accessible
 
-**Fixed 7 duplicate function definitions**:
+**Fixed 8 duplicate function definitions**:
 
-| Original Name | New Name | Registry | Line |
-|--------------|----------|----------|------|
-| `get_pp_bert_tokenize` | `get_pp_bert_tokenize_concat` | `preprocess_ops.concat_bert_tokenize` | 137 |
-| `get_pp_bert_tokenize` | `get_pp_bert_tokenize_custom` | `preprocess_ops.custom_bert_tokenize` | 304 |
-| `get_pass_keys` | `get_noun_tokenize` | `preprocess_ops.noun_tokenize` | 267 |
-| `get_pp_custom_bert_tokenize` | `get_pp_my_bert_tokenize` | `preprocess_ops.my_bert_tokenize` | 438 |
-| `get_pp_custom_bert_tokenize` | `get_pp_my_bert_tokenize_v2` | `preprocess_ops.my_bert_tokenize_v2` | 587 |
-| `get_pp_custom_bert_tokenize` | `get_pp_new_bert_tokenize` | `preprocess_ops.new_bert_tokenize` | 669 |
-| `get_pp_custom_bert_tokenize` | `get_pp_my_eval_bert_tokenize` | `preprocess_ops.my_eval_bert_tokenize` | 787 |
+| Old Function Name | New Function Name | Registry Key | Line |
+|-------------------|-------------------|--------------|------|
+| `get_pp_bert_tokenize` | `get_pp_bert_tokenize_concat` | `preprocess_ops.concat_bert_tokenize` | ~129 |
+| `get_pp_bert_tokenize` | `get_pp_bert_tokenize_custom` | `preprocess_ops.custom_bert_tokenize` | ~304 |
+| `get_pass_keys` | `get_noun_tokenize` | `preprocess_ops.noun_tokenize` | ~259 |
+| `get_pp_custom_bert_tokenize` | `get_pp_my_bert_tokenize` | `preprocess_ops.my_bert_tokenize` | ~438 |
+| `get_pp_custom_bert_tokenize` | `get_pp_my_bert_tokenize_v2` | `preprocess_ops.my_bert_tokenize_v2` | ~587 |
+| `get_pp_custom_bert_tokenize` | `get_pp_new_bert_tokenize` | `preprocess_ops.new_bert_tokenize` | ~669 |
+| `get_pp_custom_bert_tokenize` | `get_pp_my_eval_bert_tokenize` | `preprocess_ops.my_eval_bert_tokenize` | ~787 |
+| `get_copy` (ops_general.py) | `get_random_copy` | `preprocess_ops.random_copy` | ~177 |
 
 **Impact**: Previously, only the last definition would be used, causing incorrect behavior. Now all functions are accessible with unique names.
 

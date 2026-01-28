@@ -21,7 +21,7 @@ import jax.numpy as jnp
 import optax
 import src.helpers.utils as u
 
-# Use the steps function from utils
+# Consolidated duplicate implementation - using shared utility from helpers.utils
 steps = u.steps
 
 

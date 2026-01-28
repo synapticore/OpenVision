@@ -232,10 +232,13 @@ def _create_pipeline_iterator(data, fn, n_prefetch, mix_fn=None):
     """Helper function to create pipeline iterator with consistent logic.
     
     Args:
-        data: Input data - can be a list of two datasets or a single dataset
+        data: Input data - can be:
+            1) A list of two datasets (for dual text sources)
+            2) A single dataset with mix_fn applied
+            3) A single dataset without mixing
         fn: Function to apply to each element via tree_map
         n_prefetch: Number of batches to prefetch
-        mix_fn: Optional mixing function to apply to elements
+        mix_fn: Optional mixing function to apply to elements before fn
         
     Returns:
         Prefetched iterator

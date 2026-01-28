@@ -39,6 +39,10 @@ from src.datasets import input_pipeline
 from src.helpers.sharding import reshard
 from src.evaluators.common import with_infinite_padding
 
+
+# Alias to shared utility function for backward compatibility
+_with_infinite_padding = with_infinite_padding
+
 DATASET_NAMES = ("imagenet2012")
 DEFAULT_OVERRIDES = (
     ("imagenet2012", (
@@ -49,7 +53,7 @@ DEFAULT_OVERRIDES = (
 
 
 
-# Use the shared function from common module instead of local definition
+# Alias to shared utility function for backward compatibility
 _with_infinite_padding = with_infinite_padding
 
 

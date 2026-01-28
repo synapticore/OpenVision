@@ -42,7 +42,7 @@ def extract_diagonal_logits(logits, rank):
     """Efficiently extract diagonal elements from logits using vectorized operations.
     
     Replaces inefficient list comprehension pattern:
-        -jnp.array([logits[i][i + rank * logits.shape[0]] for i in range(logits.shape[0])])
+        -jnp.array([logits[i][i + rank * batch_size] for i in range(batch_size)])
     
     Args:
         logits: 2D array of shape [batch_size, num_classes]
