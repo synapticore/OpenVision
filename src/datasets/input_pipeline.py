@@ -227,17 +227,42 @@ def shard_and_put(x, mesh, sharding, tokenizer=None, context_length=128):
 
     return jax.make_array_from_single_device_arrays(global_shape, sharding, xs)
 
+
+def _create_pipeline_iterator(data, fn, n_prefetch, mix_fn=None):
+    """Helper function to create pipeline iterator with consistent logic.
+    
+    Args:
+        data: Input data - can be:
+            1) A list of two datasets (for dual text sources)
+            2) A single dataset with mix_fn applied
+            3) A single dataset without mixing
+        fn: Function to apply to each element via tree_map
+        n_prefetch: Number of batches to prefetch
+        mix_fn: Optional mixing function to apply to elements before fn
+        
+    Returns:
+        Prefetched iterator
+    """
+    if isinstance(data, list):
+        # Handle paired datasets (e.g., dual text sources)
+        it = (jax.tree_util.tree_map(fn, elem) for elem in zip(iter(data[0]), iter(data[1])))
+    elif mix_fn:
+        # Apply mixing function before tree_map
+        it = (jax.tree_util.tree_map(fn, mix_fn(elem)) for elem in iter(data))
+    else:
+        # Standard single dataset
+        it = (jax.tree_util.tree_map(fn, elem) for elem in iter(data))
+    
+    return prefetch_iterator(it, n_prefetch)
+
+
 def start_input_pipeline_eval(data, mesh=None, data_sharding=None, tokenizer=None, context_length=128):
 
   assert (mesh and data_sharding), 'the mesh and data sharding should be specified'
-  n_prefetch =1
+  n_prefetch = 1
   fn = functools.partial(shard_and_put, mesh=mesh, sharding=data_sharding,
                          tokenizer=tokenizer, context_length=context_length)
-  if isinstance(data, list):
-      it = (jax.tree_util.tree_map(fn,  elem) for elem in zip(iter(data[0]),iter(data[1])))
-      return prefetch_iterator(it, n_prefetch)
-  it = (jax.tree_util.tree_map(fn, elem) for elem in iter(data))
-  return prefetch_iterator(it, n_prefetch)
+  return _create_pipeline_iterator(data, fn, n_prefetch)
 
 def start_input_pipeline(data, config=None, mesh=None, data_sharding=None, mix_fn=None, tokenizer=None):
 
@@ -246,14 +271,7 @@ def start_input_pipeline(data, config=None, mesh=None, data_sharding=None, mix_f
 
   fn = functools.partial(shard_and_put, mesh=mesh, sharding=data_sharding,
                          tokenizer=tokenizer, context_length=config.input.txt_token_length)
-  if isinstance(data, list):
-      it = (jax.tree_util.tree_map(fn,  elem) for elem in zip(iter(data[0]),iter(data[1])))
-      return prefetch_iterator(it, n_prefetch)
-  if mix_fn:
-     it = (jax.tree_util.tree_map(fn, mix_fn(elem)) for elem in iter(data))
-  else:
-     it = (jax.tree_util.tree_map(fn, elem) for elem in iter(data))
-  return prefetch_iterator(it, n_prefetch)
+  return _create_pipeline_iterator(data, fn, n_prefetch, mix_fn)
 
 
 def start_ragged_input_pipeline(data, n_prefetch=1, shard=True, ragged=None):
