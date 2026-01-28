@@ -19,8 +19,8 @@ python3.10 -m venv ~/openvision/openvision_env
 source ~/openvision/openvision_env/bin/activate  # OR: . ~/openvision/openvision_env/bin/activate
 
 # Install dependencies (this takes ~5-10 minutes)
-bash setup.sh DEVICE=tpu JAX_VERSION=0.4.38
-# For GPU: bash setup.sh DEVICE=gpu JAX_VERSION=0.4.38
+bash setup.sh MODE=stable DEVICE=tpu JAX_VERSION=0.4.38
+# For GPU: bash setup.sh MODE=stable DEVICE=gpu JAX_VERSION=0.4.38
 ```
 
 **Common Errors & Fixes**:
@@ -33,7 +33,7 @@ bash setup.sh DEVICE=tpu JAX_VERSION=0.4.38
 
 ## Project Structure
 
-**Root Files**: README.md (docs+model zoo), LICENSE (Apache 2.0), .gitignore (excludes venv/npz/logs), requirements.txt, setup.sh (env setup), test.py (PyTorch test), tpu_command.sh (TPU mgmt), assets/ (vocab/logos), scripts/ (training), src/ (code)
+**Root Files**: README.md (docs+model zoo), LICENSE (Apache 2.0), .gitignore (excludes venv/npz/logs), requirements.txt, setup.sh (env setup), test.py (PyTorch test), tpu_command.sh (TPU management), assets/ (vocab/logos), scripts/ (training), src/ (code)
 
 **src/ Structure**:
 - **Entry points**: main_clip.py (original), main_openvision2.py (v2)
@@ -77,7 +77,7 @@ bash setup.sh DEVICE=tpu JAX_VERSION=0.4.38
 
 **Quick Commands**:
 ```bash
-# Setup: python3.10 -m venv ~/openvision/openvision_env && . ~/openvision/openvision_env/bin/activate && bash setup.sh DEVICE=tpu JAX_VERSION=0.4.38
+# Setup: python3.10 -m venv ~/openvision/openvision_env && . ~/openvision/openvision_env/bin/activate && bash setup.sh MODE=stable DEVICE=tpu JAX_VERSION=0.4.38
 # Train: bash scripts/project/openvision2/train.sh  # Edit script first!
 # TPU: . ./tpu_command.sh && tpu
 # Validate: python3 -m src.main_openvision2 --config=src/configs/openvision2.py:res=224 --config.eval_only=True --workdir=/tmp/test
